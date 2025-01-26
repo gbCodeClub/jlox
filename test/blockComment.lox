@@ -1,0 +1,4 @@
+/* should support
+multiple lines, taking care of line count */
+
+@ // error to check line num
