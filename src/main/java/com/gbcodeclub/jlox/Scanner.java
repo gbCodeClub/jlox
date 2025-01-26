@@ -105,13 +105,22 @@ class Scanner {
     }
 
     private void blockComment() {
-        boolean matchSuccess;
-        while (!(matchSuccess = match2('*', '/')) && !isAtEnd()) {
+        int depth = 1;
+        while (depth > 0 && !isAtEnd()) {
+            if (match('*') && match('/')) {
+                --depth;
+                continue;
+            }
+            if (match('/') && match('*')) {
+                ++depth;
+                continue;
+            }
+
             if (peek() == '\n') line++;
             advance();
         }
 
-        if (!matchSuccess) {
+        if (depth > 0) {
             Lox.error(line, "Unterminated comment.");
             return;
         }
@@ -173,10 +182,6 @@ class Scanner {
 
         current++;
         return true;
-    }
-
-    private boolean match2(char expected, char expectedNext) {
-        return match(expected) && match(expectedNext);
     }
 
     private char peek() {
