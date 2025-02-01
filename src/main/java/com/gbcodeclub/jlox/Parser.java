@@ -28,11 +28,22 @@ class Parser {
     }
 
     private Expr comma() {
-        Expr expr = equality();
+        Expr expr = ternary();
         while (match(COMMA)) {
             Token operator = previous();
-            Expr right = equality();
+            Expr right = ternary();
             expr = new Expr.Binary(expr, operator, right);
+        }
+        return expr;
+    }
+
+    private Expr ternary() {
+        Expr expr = equality();
+        if (match(QUESTION)) {
+            Expr middle = expression();
+            consume(COLON, "Expected ':'.");
+            Expr end = ternary();
+            return new Expr.Ternary(expr, middle, end);
         }
         return expr;
     }
@@ -100,6 +111,27 @@ class Parser {
             Expr expr = expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
+        }
+
+        if (match(BANG_EQUAL, EQUAL_EQUAL)) {
+            error(previous(), "Binary operator at beginning of expr.");
+            equality();
+            return null;
+        }
+        if (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
+            error(previous(), "Binary operator at beginning of expr.");
+            comparison();
+            return null;
+        }
+        if (match(PLUS)) {
+            error(previous(), "Binary operator at beginning of expr.");
+            term();
+            return null;
+        }
+        if (match(SLASH, STAR)) {
+            error(previous(), "Binary operator at beginning of expr.");
+            factor();
+            return null;
         }
 
         throw error(peek(), "Expect expression.");

@@ -1,6 +1,7 @@
 package com.gbcodeclub.jlox;
 
 import com.gbcodeclub.jlox.Expr;
+import com.gbcodeclub.jlox.Expr.Ternary;
 
 class AstPrinter implements Expr.Visitor<String> {
 
@@ -28,6 +29,11 @@ class AstPrinter implements Expr.Visitor<String> {
     @Override
     public String visitUnaryExpr(Expr.Unary expr) {
         return parenthesize(expr.operator.lexeme, expr.right);
+    }
+
+    @Override
+    public String visitTernaryExpr(Ternary expr) {
+        return parenthesize("?:", expr.left, expr.middle, expr.right);
     }
 
     private String parenthesize(String name, Expr... exprs) {
